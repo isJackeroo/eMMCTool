@@ -103,11 +103,11 @@
     <h3>基本信息</h3>
     <table class="info-table">
       <tbody>
-        <tr><th>设备</th><td id="device"></td></tr>
         <tr><th>型号</th><td id="model"></td></tr>
-        <tr><th>CID</th><td id="cid"></td></tr>
-        <tr><th>生产日期</th><td id="date"></td></tr>
         <tr><th>容量</th><td id="capacity"></td></tr>
+        <tr><th>生产日期</th><td id="date"></td></tr>
+        <tr><th>CID</th><td id="cid"></td></tr>
+        <tr><th>挂载点</th><td id="device"></td></tr>
       </tbody>
     </table>
   </div>
@@ -118,8 +118,8 @@
       <tbody>
         <tr>
           <th>
-            Life Time Estimation A<br>
-            <span class="remark">（基于擦除次数）</span>
+            已使用寿命 - 擦除次数<br>
+            <span class="remark">（预估，阶梯10%）</span>
           </th>
           <td>
             <span id="lifeA_val"></span>
@@ -128,8 +128,8 @@
         </tr>
         <tr>
           <th>
-            Life Time Estimation B<br>
-            <span class="remark">（基于写入量）</span>
+            已使用寿命 - 写入量<br>
+            <span class="remark">（预估，阶梯10%）</span>
           </th>
           <td>
             <span id="lifeB_val"></span>

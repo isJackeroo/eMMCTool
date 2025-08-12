@@ -26,4 +26,4 @@ bash -c "$(wget -qLO - https://raw.githubusercontent.com/isJackeroo/eMMCTool/ref
 bash -c "$(wget -qLO - https://raw.githubusercontent.com/isJackeroo/eMMCTool/refs/heads/main/uninstall.sh)"
 ```
 
-![](https://github.com/isJackeroo/eMMCTool/blob/main/2025-08-09_14-07-59.png?raw=true)
+![](https://github.com/isJackeroo/eMMCTool/blob/main/2025-08-12_22-21-22.png?raw=true)
