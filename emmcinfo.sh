@@ -78,12 +78,12 @@ echo "Pre EOL info           : $EOL ($EOL_STR)"
 echo
 echo "==== eMMC Speed Test ===="
 sync
-echo "[WRITE TEST] Writing 100MB..."
-dd if=/dev/zero of=$TMP_FILE bs=1M count=100 conv=fsync 2>&1 | grep --color=never -E "copied|bytes" | head -1
+echo "[WRITE TEST] Writing 1GB..."
+dd if=/dev/zero of=$TMP_FILE bs=4M count=256 oflag=direct conv=fsync 2>&1 | grep --color=never -E "copied|bytes" | head -1
 
 echo
-echo "[READ TEST] Reading 500MB..."
-dd if=$DEV of=/dev/null bs=1M count=500 2>&1 | grep --color=never -E "copied|bytes" | head -1
+echo "[READ TEST] Reading 1GB..."
+dd if=$DEV of=/dev/null bs=4M count=256 iflag=direct 2>&1 | grep --color=never -E "copied|bytes" | head -1
 
 echo
 echo "[HDParm Cache/Read Test]"
