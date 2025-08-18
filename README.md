@@ -12,7 +12,7 @@
 ##### 2.环境准备：
 ```
 opkg update
-opkg install wget mmc-utils hdparm coreutils-dd
+opkg install wget mmc-utils hdparm coreutils-dd bash
 ```
 
 
