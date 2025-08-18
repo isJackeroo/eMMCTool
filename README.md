@@ -4,9 +4,9 @@
 
 ##### 1.代码结构：
 
-- /usr/bin/emmcinfo.sh - 运行 eMMC 检测，输出标准格式信息（包括型号、寿命、速度等）
+- /usr/bin/emmcinfo.sh - 运行 eMMC 检测，输出标准格式信息（包括型号、寿命、速度、CID、挂载点等）
 - /usr/lib/lua/luci/controller/emmcinfo.lua - 提供 HTTP 路由，调用脚本输出结果
-- /usr/lib/lua/luci/view/emmcinfo/status.htm - 美观简约，支持显示上次结果和检测时间戳
+- /usr/lib/lua/luci/view/emmcinfo/status.htm - 美观简约，支持显示上次检测结果和检测时间
 
 
 ##### 2.环境准备：
@@ -26,4 +26,4 @@ bash -c "$(wget -qLO - https://raw.githubusercontent.com/isJackeroo/eMMCTool/ref
 bash -c "$(wget -qLO - https://raw.githubusercontent.com/isJackeroo/eMMCTool/refs/heads/main/uninstall.sh)"
 ```
 
-![](https://github.com/isJackeroo/eMMCTool/blob/main/2025-08-12_22-21-22.png?raw=true)
+![](https://github.com/isJackeroo/eMMCTool/blob/main/2025-08-18_22-54-27.png?raw=true)

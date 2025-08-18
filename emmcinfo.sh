@@ -22,9 +22,18 @@ for pkg in mmc-utils hdparm coreutils-dd; do
 done
 
 echo "==== eMMC Info & Health Check ===="
-MODEL=$(cat /sys/block/$(basename $DEV)/device/name 2>/dev/null)
-CID=$(cat /sys/block/$(basename $DEV)/device/cid 2>/dev/null)
-DATE_RAW=$(cat /sys/block/$(basename $DEV)/device/date 2>/dev/null)
+DEV_BASENAME=$(basename $DEV)
+
+MODEL=$(cat /sys/block/$DEV_BASENAME/device/name 2>/dev/null)
+CID=$(cat /sys/block/$DEV_BASENAME/device/cid 2>/dev/null)
+DATE_RAW=$(cat /sys/block/$DEV_BASENAME/device/date 2>/dev/null)
+
+FWREV=$(cat /sys/block/$DEV_BASENAME/device/fwrev 2>/dev/null)
+HWREV=$(cat /sys/block/$DEV_BASENAME/device/hwrev 2>/dev/null)
+MANFID=$(cat /sys/block/$DEV_BASENAME/device/manfid 2>/dev/null)
+OEMID=$(cat /sys/block/$DEV_BASENAME/device/oemid 2>/dev/null)
+PRV=$(cat /sys/block/$DEV_BASENAME/device/prv 2>/dev/null)
+SERIAL=$(cat /sys/block/$DEV_BASENAME/device/serial 2>/dev/null)
 
 # 统一日期格式 YYYY-MM
 if echo "$DATE_RAW" | grep -q '/'; then
@@ -36,10 +45,9 @@ else
 fi
 
 # 获取容量（字节）
-SIZE_BYTES=$(cat /sys/block/$(basename $DEV)/size 2>/dev/null)
-# /sys/block/mmcblk0/size 单位是扇区（通常512字节），计算容量
-if [ -n "$SIZE_BYTES" ]; then
-    BYTES=$((SIZE_BYTES * 512))
+SIZE_SECTORS=$(cat /sys/block/$DEV_BASENAME/size 2>/dev/null)
+if [ -n "$SIZE_SECTORS" ]; then
+    BYTES=$((SIZE_SECTORS * 512))
     if [ "$BYTES" -ge $((1024**3)) ]; then
         CAPACITY=$(awk "BEGIN {printf \"%.2f GB\", $BYTES/1024/1024/1024}")
     elif [ "$BYTES" -ge $((1024**2)) ]; then
@@ -51,11 +59,17 @@ else
     CAPACITY="Unknown"
 fi
 
-echo "Device  : $DEV"
-echo "Model   : $MODEL"
-echo "CID     : $CID"
-echo "Date    : $DATE_FMT"
-echo "Capacity: $CAPACITY"
+echo "Device    : $DEV"
+echo "Model     : $MODEL"
+echo "CID       : $CID"
+echo "Date      : $DATE_FMT"
+echo "Capacity  : $CAPACITY"
+echo "FWRev    : $FWREV"
+echo "HWRev    : $HWREV"
+echo "Manf ID   : $MANFID"
+echo "OEM ID    : $OEMID"
+echo "Product Ver: $PRV"
+echo "Serial : $SERIAL"
 
 echo
 echo "==== eMMC Health (EXT_CSD) ===="
@@ -92,3 +106,4 @@ hdparm -tT $DEV 2>&1 | grep -E "Timing cached reads|Timing buffered disk reads"
 rm -f $TMP_FILE
 echo
 echo "==== Done ===="
+

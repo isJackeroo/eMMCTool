@@ -78,7 +78,6 @@
     font-weight: 600;
     color: var(--cbi-section-header-color, #2c3e50);
   }
-  /* 时间戳红色固定位置 */
   #lastCheckTime {
     position: absolute;
     right: 20px;
@@ -89,6 +88,21 @@
     font-family: monospace;
     user-select: none;
   }
+  
+  .log-output {
+    background-color: #1e1e1e;       /* 深色背景，类似 VSCode */
+    color: #dcdcdc;                  /* 柔和字体颜色 */
+    font-family: Consolas, monospace; /* 等宽字体 */
+    font-size: 13px;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    white-space: pre-wrap;          /* 自动换行 */
+    word-break: break-word;
+    max-height: 400px;              /* 限制高度，避免撑满页面 */
+    overflow-y: auto;               /* 可滚动 */
+    box-shadow: inset 0 0 5px #000; /* 内阴影增强层次感 */
+}
 </style>
 
 <h2 class="cbi-section-title">eMMC 检测工具</h2>
@@ -108,6 +122,12 @@
         <tr><th>生产日期</th><td id="date"></td></tr>
         <tr><th>CID</th><td id="cid"></td></tr>
         <tr><th>挂载点</th><td id="device"></td></tr>
+        <tr><th>固件版本</th><td id="fwrev"></td></tr>
+        <tr><th>硬件版本</th><td id="hwrev"></td></tr>
+        <tr><th>厂商ID</th><td id="manfid"></td></tr>
+        <tr><th>OEM ID</th><td id="oemid"></td></tr>
+        <tr><th>产品版本</th><td id="prv"></td></tr>
+        <tr><th>序列号</th><td id="serial"></td></tr>
       </tbody>
     </table>
   </div>
@@ -147,10 +167,11 @@
     <div id="lastCheckTime" title="最后检测时间"></div>
   </div>
 
-  <details id="resultConsole" open>
-    <summary style="cursor:pointer; user-select:none;">详细检测日志 (可折叠)</summary>
-    <pre id="rawOutput"></pre>
-  </details>
+
+<h3 style="cursor:pointer; user-select:none;">详细检测日志</h3>
+<pre id="rawOutput" class="log-output"></pre>
+
+
 </div>
 
 <script type="text/javascript">
@@ -166,11 +187,7 @@ function loadFromStorage() {
     if (savedData && savedTime) {
       document.getElementById("rawOutput").textContent = savedData;
       document.getElementById("infoCards").style.display = "block";
-
-      // 显示时间戳
       document.getElementById("lastCheckTime").textContent = "检测时间: " + savedTime;
-
-      // 解析并填充数据，复用runCheck的解析部分逻辑
       parseAndFill(savedData);
     }
   } catch(e) {
@@ -180,18 +197,29 @@ function loadFromStorage() {
 
 function parseAndFill(txt) {
   try {
-    // [修正] 修正了正则表达式，以统一处理标签和冒号之间的可选空格，增强代码的健壮性。
     const devMatch = txt.match(/Device\s*:\s*(.*)/);
     const modelMatch = txt.match(/Model\s*:\s*(.*)/);
     const cidMatch = txt.match(/CID\s*:\s*(.*)/);
     const dateMatch = txt.match(/Date\s*:\s*(.*)/);
     const capacityMatch = txt.match(/Capacity\s*:\s*(.*)/);
+    const fwrevMatch = txt.match(/FWRev\s*:\s*(.*)/);
+    const hwrevMatch = txt.match(/HWRev\s*:\s*(.*)/);
+    const manfidMatch = txt.match(/Manf ID\s*:\s*(.*)/);
+    const oemidMatch = txt.match(/OEM ID\s*:\s*(.*)/);
+    const prvMatch = txt.match(/Product Ver\s*:\s*(.*)/);
+    const serialMatch = txt.match(/Serial(?:\s*No)?\s*:\s*(.*)/);
 
     if (devMatch) document.getElementById("device").textContent = devMatch[1].trim();
     if (modelMatch) document.getElementById("model").textContent = modelMatch[1].trim();
     if (cidMatch) document.getElementById("cid").textContent = cidMatch[1].trim();
     if (dateMatch) document.getElementById("date").textContent = dateMatch[1].trim();
     if (capacityMatch) document.getElementById("capacity").textContent = capacityMatch[1].trim();
+    if (fwrevMatch) document.getElementById("fwrev").textContent = fwrevMatch[1].trim();
+    if (hwrevMatch) document.getElementById("hwrev").textContent = hwrevMatch[1].trim();
+    if (manfidMatch) document.getElementById("manfid").textContent = manfidMatch[1].trim();
+    if (oemidMatch) document.getElementById("oemid").textContent = oemidMatch[1].trim();
+    if (prvMatch) document.getElementById("prv").textContent = prvMatch[1].trim();
+    if (serialMatch) document.getElementById("serial").textContent = serialMatch[1].trim().toUpperCase();
 
     // 寿命信息
     const lifeAMatch = txt.match(/Life Time Estimation A\s*:\s*0x([0-9a-fA-F]+) \(~(\d+)% used\)/);
@@ -212,63 +240,38 @@ function parseAndFill(txt) {
       document.getElementById("preEOL").textContent = preEOLMatch[2];
     }
 
-    // 速度测试简洁展示
+    // 速度信息解析
     const speedSection = txt.split("==== eMMC Speed Test ====")[1];
     if (speedSection) {
       const lines = speedSection.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+      let writeSpeed = null, readSpeed = null, hdparmCached = null, hdparmBuffered = null;
 
-      // 解析写入速度
-      let writeSpeed = null;
-      for(let line of lines) {
+      for (let line of lines) {
         let m = line.match(/([\d\.]+)\s*(MB|GB)\/s/);
         if (m && line.toLowerCase().includes("copied")) {
           writeSpeed = m[1] + " " + m[2] + "/s";
           break;
         }
       }
-
-      // 解析读取速度
-      let readSpeed = null;
-      for(let line of lines) {
-        let m = line.match(/([\d\.]+)\s*(MB|GB)\/s/);
-        if (m && line.toLowerCase().includes("reading")) {
-          readSpeed = m[1] + " " + m[2] + "/s";
-          break;
+      for (let line of lines) {
+        if (line.toLowerCase().includes("copied") && !line.toLowerCase().includes("write")) {
+          let m = line.match(/([\d\.]+)\s*(MB|GB)\/s/);
+          if (m) { readSpeed = m[1] + " " + m[2] + "/s"; break; }
         }
       }
-      if (!readSpeed) {
-        for(let line of lines) {
-          if(line.toLowerCase().includes("bytes") && line.toLowerCase().includes("copied") && !line.toLowerCase().includes("write")) {
-            let m = line.match(/([\d\.]+)\s*(MB|GB)\/s/);
-            if(m) { readSpeed = m[1] + " " + m[2] + "/s"; break;}
-          }
-        }
-      }
-
-      // 解析 hdparm 测速
-      let hdparmCached = null;
-      let hdparmBuffered = null;
-      for(let line of lines) {
-        let cachedM = line.match(/Timing cached reads:\s+([\d\.]+) MB in\s+[\d\.]+ seconds = ([\d\.]+) MB\/sec/);
-        let bufferedM = line.match(/Timing buffered disk reads:\s+([\d\.]+) MB in\s+[\d\.]+ seconds = ([\d\.]+) MB\/sec/);
-        if(cachedM) hdparmCached = cachedM[2] + " MB/s";
-        if(bufferedM) hdparmBuffered = bufferedM[2] + " MB/s";
+      for (let line of lines) {
+        let cachedM = line.match(/Timing cached reads:.*=\s*([\d\.]+) MB\/sec/);
+        let bufferedM = line.match(/Timing buffered disk reads:.*=\s*([\d\.]+) MB\/sec/);
+        if (cachedM) hdparmCached = cachedM[1] + " MB/s";
+        if (bufferedM) hdparmBuffered = bufferedM[1] + " MB/s";
       }
 
       const ul = document.getElementById("speedResults");
       ul.innerHTML = "";
-      if(writeSpeed)
-        ul.insertAdjacentHTML("beforeend", `<li>写入速度: ${writeSpeed}</li>`);
-      if(readSpeed)
-        ul.insertAdjacentHTML("beforeend", `<li>读取速度: ${readSpeed}</li>`);
-      if(hdparmCached)
-        ul.insertAdjacentHTML("beforeend", `<li>缓存读取速度 (hdparm): ${hdparmCached}</li>`);
-      if(hdparmBuffered)
-        ul.insertAdjacentHTML("beforeend", `<li>缓冲读取速度 (hdparm): ${hdparmBuffered}</li>`);
-
-      if(!writeSpeed && !readSpeed && !hdparmCached && !hdparmBuffered) {
-        ul.insertAdjacentHTML("beforeend", `<li>速度测试结果无法解析</li>`);
-      }
+      if (writeSpeed) ul.insertAdjacentHTML("beforeend", `<li>写入速度: ${writeSpeed}</li>`);
+      if (readSpeed) ul.insertAdjacentHTML("beforeend", `<li>读取速度: ${readSpeed}</li>`);
+      if (hdparmCached) ul.insertAdjacentHTML("beforeend", `<li>缓存读取速度 (hdparm): ${hdparmCached}</li>`);
+      if (hdparmBuffered) ul.insertAdjacentHTML("beforeend", `<li>缓冲读取速度 (hdparm): ${hdparmBuffered}</li>`);
     }
   } catch(e) {
     console.warn("解析异常", e);
@@ -280,20 +283,14 @@ function runCheck() {
   btn.disabled = true;
   btn.textContent = "检测中，请稍候...";
 
-  // 清理旧内容
   document.getElementById("infoCards").style.display = "none";
   document.getElementById("rawOutput").textContent = "";
-  document.getElementById("speedResults").innerHTML = "";
-  document.getElementById("device").textContent = "";
-  document.getElementById("model").textContent = "";
-  document.getElementById("cid").textContent = "";
-  document.getElementById("date").textContent = "";
-  document.getElementById("capacity").textContent = "";
-  document.getElementById("lifeA_val").textContent = "";
-  document.getElementById("lifeB_val").textContent = "";
+  ["device","model","cid","date","capacity","fwrev","hwrev","manfid","oemid","prv","serial","lifeA_val","lifeB_val","preEOL"].forEach(id => {
+    document.getElementById(id).textContent = "";
+  });
   document.getElementById("lifeA_bar").style.width = "0%";
   document.getElementById("lifeB_bar").style.width = "0%";
-  document.getElementById("preEOL").textContent = "";
+  document.getElementById("speedResults").innerHTML = "";
   document.getElementById("lastCheckTime").textContent = "";
 
   fetch('<%=url([[admin]], [[system]], [[emmcinfo_run]])%>')
@@ -303,20 +300,12 @@ function runCheck() {
       btn.disabled = false;
       btn.textContent = "运行检测";
       document.getElementById("infoCards").style.display = "block";
-
-      // 显示当前检测时间戳
       const nowStr = formatDateTime(new Date());
       document.getElementById("lastCheckTime").textContent = "检测时间: " + nowStr;
-
-      // 保存结果和时间到localStorage
       try {
         localStorage.setItem("emmcinfo_last_result", txt);
         localStorage.setItem("emmcinfo_last_time", nowStr);
-      } catch(e) {
-        console.warn("保存检测结果失败", e);
-      }
-
-      // 解析并填充数据
+      } catch(e) {}
       parseAndFill(txt);
     })
     .catch(err => {
@@ -326,9 +315,7 @@ function runCheck() {
     });
 }
 
-// 页面加载时自动尝试加载上次结果
-window.onload = function() {
-  loadFromStorage();
-};
+window.onload = loadFromStorage;
 </script>
 <%+footer%>
+
