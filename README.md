@@ -28,9 +28,7 @@ bash -c "$(wget -qLO - https://raw.githubusercontent.com/isJackeroo/eMMCTool/ref
 
 ![](https://github.com/isJackeroo/eMMCTool/blob/main/2025-08-18_22-54-27.png?raw=true)
 
-##### 5.一键更新：
 
-```
-bash -c "$(wget -qLO - https://raw.githubusercontent.com/isJackeroo/eMMCTool/refs/heads/main/update.sh)"
-```
+
+
 
