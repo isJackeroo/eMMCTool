@@ -106,7 +106,7 @@
 </style>
 
 <h2 class="cbi-section-title">eMMC 检测工具</h2>
-<p>点击下方按钮运行检测，显示型号、寿命和速度信息。</p>
+<p>点击下方按钮运行检测，显示型号、寿命和速度等信息。查看你设备内的eMMC芯片的主要参数信息。</p>
 
 <div class="btn-center">
   <button class="cbi-button cbi-button-apply" onclick="runCheck()">运行检测</button>
@@ -118,28 +118,28 @@
     <table class="info-table">
       <tbody>
         <tr><th>型号</th><td id="model"></td></tr>
-        <tr><th>容量</th><td id="capacity"></td></tr>
-        <tr><th>生产日期</th><td id="date"></td></tr>
         <tr><th>CID</th><td id="cid"></td></tr>
-        <tr><th>挂载点</th><td id="device"></td></tr>
+        <tr><th>容量</th><td id="capacity"></td></tr>
+        <tr><th>序列号</th><td id="serial"></td></tr>
+        <tr><th>挂载点</th><td id="device"></td></tr>      
         <tr><th>固件版本</th><td id="fwrev"></td></tr>
         <tr><th>硬件版本</th><td id="hwrev"></td></tr>
         <tr><th>厂商ID</th><td id="manfid"></td></tr>
         <tr><th>OEM ID</th><td id="oemid"></td></tr>
         <tr><th>产品版本</th><td id="prv"></td></tr>
-        <tr><th>序列号</th><td id="serial"></td></tr>
+        <tr><th>生产日期</th><td id="date"></td></tr>
       </tbody>
     </table>
   </div>
 
   <div class="card" id="healthInfo">
-    <h3>寿命信息</h3>
+    <h3>寿命信息<small>（10%阶梯）</small></h3>
     <table class="info-table">
       <tbody>
         <tr>
           <th>
-            已使用寿命 - 擦除次数<br>
-            <span class="remark">（预估，阶梯10%）</span>
+            已使用寿命<br>
+            <span class="remark">（擦除次数）</span>
           </th>
           <td>
             <span id="lifeA_val"></span>
@@ -148,8 +148,8 @@
         </tr>
         <tr>
           <th>
-            已使用寿命 - 写入量<br>
-            <span class="remark">（预估，阶梯10%）</span>
+            已使用寿命<br>
+            <span class="remark">（写入量）</span>
           </th>
           <td>
             <span id="lifeB_val"></span>
